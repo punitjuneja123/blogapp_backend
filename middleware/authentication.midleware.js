@@ -7,6 +7,7 @@ let authentication = (req, res, next) => {
     jwt.verify(token, process.env.secret, (err, decode) => {
       if (decode) {
         req.body.userID = decode.userID;
+        // console.log(req.body);
         next();
       } else {
         res.status(498).send({ msg: "please provide correct token" });

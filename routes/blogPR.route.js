@@ -1,14 +1,33 @@
 // protected blog route
 const express = require("express");
+const multer = require("multer");
+const path = require("path");
 
 const { blog } = require("../model/db.model");
 
 const blogPRRouter = express.Router();
 
+// setting up multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/images");
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      file.fieldname + "_" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({ storage: storage });
+
 // posting blog
-blogPRRouter.post("/post", async (req, res) => {
+blogPRRouter.post("/post", upload.single("image"), async (req, res) => {
   let payload = req.body;
   payload.author_id = payload.userID;
+  payload.image = req.file.filename;
+  console.log(req.file, req.body);
   try {
     const data = await blog.create(payload);
     res.status(201).send({ msg: "blog posted", data });
